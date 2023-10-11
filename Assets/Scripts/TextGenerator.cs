@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using Photon.Pun;
 
-public class TextGenerator : MonoBehaviour
+public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
 {
     [SerializeField] GameObject textObject;
     [SerializeField] Transform canvas;
@@ -23,6 +24,8 @@ public class TextGenerator : MonoBehaviour
     int loopEachNumber = 2;
     int loopNumber = 5;
     List<string> loopText = new List<string>();
+    int gameTypeNumber;
+    List<int> letter = new List<int>();
 
 
     // Start is called before the first frame update
@@ -39,11 +42,15 @@ public class TextGenerator : MonoBehaviour
 
     void SwitchGameType()
     {
-        int r = Random.Range(0, 2);
-        switch (r)
+        gameTypeNumber = Random.Range(0, 2);
+        switch (gameTypeNumber)
         {
             case 0:
                 letterNumber = Random.Range(5, 11);
+                for (int i = 0; i < letterNumber; i++)
+                {
+                    letter.Add(Random.Range(0, letters.Length));
+                }
                 GenerateTextObject();
                 RandomTextGenerate();
                 break;
@@ -51,6 +58,10 @@ public class TextGenerator : MonoBehaviour
                 loopEachNumber = Random.Range(2, 5);
                 loopNumber = Random.Range(5, 10);
                 letterNumber = loopEachNumber * loopNumber;
+                for (int i = 0; i < letterNumber; i++)
+                {
+                    letter.Add(Random.Range(0, letters.Length));
+                }
                 GenerateTextObject();
                 RoopTextGenerate();
                 break;
@@ -107,25 +118,20 @@ public class TextGenerator : MonoBehaviour
             if (arrangedLetters.Count == 0)
             {
                 arrangedLetters = null;
-                StartCoroutine(gameManager.LoadScene());
+                if (PhotonNetwork.IsMasterClient)
+                {
+                    gameManager.SetIsMasterClientFinished();
+                }
+                else
+                {
+                    gameManager.SetIsAnotherFinished();
+                }
             }
         }
-        else if (Input.GetKeyDown(KeyCode.Escape)) 
-        { 
-            
-        }
-        else if (Input.GetMouseButtonDown(0))
-        {
-
-        }
-        else if (Input.GetMouseButtonDown(1))
-        {
-
-        }
-        else if (Input.GetMouseButtonDown(2))
-        {
-
-        }
+        else if (Input.GetKeyDown(KeyCode.Escape)) { }
+        else if (Input.GetMouseButtonDown(0)) { }
+        else if (Input.GetMouseButtonDown(1)) { }
+        else if (Input.GetMouseButtonDown(2)) { }
         else if (Input.anyKeyDown)
         {
             TextColorChange(Color.red);
@@ -136,4 +142,26 @@ public class TextGenerator : MonoBehaviour
     {
         textArray[letterNumber - arrangedLetters.Count].color = color;
     }
+
+    /*void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    {
+        if (stream.IsWriting)
+        {
+            //if (!PhotonNetwork.IsMasterClient) return;
+            stream.SendNext(gameTypeNumber);
+            stream.SendNext(letterNumber);
+            stream.SendNext(loopEachNumber);
+            stream.SendNext(loopNumber);
+            stream.SendNext(letter);
+        }
+        else
+        {
+            //if (PhotonNetwork.IsMasterClient) return;
+            gameTypeNumber = (int)stream.ReceiveNext();
+            letterNumber = (int)stream.ReceiveNext();
+            loopEachNumber = (int)stream.ReceiveNext();
+            loopNumber = (int)stream.ReceiveNext();
+            letter = (List<int>)stream.ReceiveNext();
+        }
+    }*/
 }
