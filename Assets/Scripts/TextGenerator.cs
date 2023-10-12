@@ -31,7 +31,7 @@ public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
     // Start is called before the first frame update
     void Start()
     {
-        SwitchGameType();
+        
     }
 
     // Update is called once per frame
@@ -40,7 +40,7 @@ public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
         InputKey();
     }
 
-    void SwitchGameType()
+    public void SwitchGameType()
     {
         gameTypeNumber = Random.Range(0, 2);
         switch (gameTypeNumber)
@@ -111,6 +111,7 @@ public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
     void InputKey()
     {
         if (arrangedLetters == null) return;
+        if (arrangedLetters.Count == 0) return;
         if (Input.GetKeyDown(arrangedLetters[0]))
         {
             TextColorChange(Color.black);

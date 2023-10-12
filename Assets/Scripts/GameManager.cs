@@ -3,10 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
 {
     [SerializeField] GameObject finishText;
+    [SerializeField] Text playerNameText;
+    [SerializeField] Text enemyNameText;
+    [SerializeField] GameObject playerNameTextObject;
+    [SerializeField] GameObject enemyNameTextObject;
     bool isMasterclientFinished = false;
     bool isAnotherFinished = false;
 
@@ -15,6 +20,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         GameDataManager.Instance.SceneNumber++;
         HideCursor();
         HideFinishText();
+        HideNameText();
     }
 
     private void Update()
@@ -103,6 +109,20 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     void HideFinishText()
     {
         finishText.SetActive(false);
+    }
+
+    public void ShowNameText()
+    {
+        playerNameTextObject.SetActive(true);
+        enemyNameTextObject.SetActive(true);
+        playerNameText.text = PhotonNetwork.LocalPlayer.NickName;
+        enemyNameText.text = PhotonNetwork.PlayerListOthers[0].NickName;
+    }
+
+    public void HideNameText()
+    {
+        playerNameTextObject.SetActive(false);
+        enemyNameTextObject.SetActive(false);
     }
 
     void OnClick()
