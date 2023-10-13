@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
 {
     [SerializeField] GameObject finishText;
+    [SerializeField] GameObject enemyFinishText;
     [SerializeField] Text playerNameText;
     [SerializeField] Text enemyNameText;
     [SerializeField] GameObject playerNameTextObject;
@@ -19,7 +20,8 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     {
         GameDataManager.Instance.SceneNumber++;
         HideCursor();
-        HideFinishText();
+        HideFinishText(finishText);
+        HideFinishText(enemyFinishText);
         HideNameText();
     }
 
@@ -66,13 +68,27 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     public void SetIsMasterClientFinished()
     {
         isMasterclientFinished = true;
-        ShowFinishText();
+        if (PhotonNetwork.IsMasterClient)
+        {
+            ShowFinishText(finishText);
+        }
+        else
+        {
+            ShowFinishText(enemyFinishText);
+        }
     }
 
     public void SetIsAnotherFinished()
     {
         isAnotherFinished = true;
-        ShowFinishText();
+        if (!PhotonNetwork.IsMasterClient)
+        {
+            ShowFinishText(finishText);
+        }
+        else
+        {
+            ShowFinishText(enemyFinishText);
+        }
     }
 
     IEnumerator FinishJudge()
@@ -101,12 +117,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         }
     }
 
-    void ShowFinishText()
+    void ShowFinishText(GameObject finishText)
     {
         finishText.SetActive(true);
     }
     
-    void HideFinishText()
+    void HideFinishText(GameObject finishText)
     {
         finishText.SetActive(false);
     }
@@ -130,7 +146,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         if (Input.GetMouseButtonDown(0))
         {
             if (Cursor.visible == false) return;
-            Cursor.visible = false;
+            HideCursor();
         }
     }
 

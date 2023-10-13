@@ -5,15 +5,18 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Photon.Pun;
 
-public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
+public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
 {
     [SerializeField] GameObject textObject;
     [SerializeField] Transform canvas;
+    [SerializeField] Transform enemyCanvas;
     [SerializeField] GameManager gameManager;
 
     string[] letters = new string[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" };
     List<Text> textArray = new List<Text>();
+    List<Text> enemyTextArray = new List<Text>();
     List<GameObject> textArrayObject = new List<GameObject>();
+    List<GameObject> enemyTextArrayObject = new List<GameObject>();
     List<string> arrangedLetters = new List<string>();
     RectTransform rectTransform;
     float textWidth = 20f;
@@ -25,13 +28,13 @@ public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
     int loopNumber = 5;
     List<string> loopText = new List<string>();
     int gameTypeNumber;
-    List<int> letter = new List<int>();
+    int[] letter;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        Prepare();
     }
 
     // Update is called once per frame
@@ -40,35 +43,50 @@ public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
         InputKey();
     }
 
-    public void SwitchGameType()
+    void Prepare()
     {
         gameTypeNumber = Random.Range(0, 2);
         switch (gameTypeNumber)
         {
             case 0:
                 letterNumber = Random.Range(5, 11);
+                letter = new int[letterNumber];
                 for (int i = 0; i < letterNumber; i++)
                 {
-                    letter.Add(Random.Range(0, letters.Length));
+                    letter[i] = Random.Range(0, letters.Length);
                 }
-                GenerateTextObject();
-                RandomTextGenerate();
                 break;
             case 1:
                 loopEachNumber = Random.Range(2, 5);
                 loopNumber = Random.Range(5, 10);
                 letterNumber = loopEachNumber * loopNumber;
+                letter = new int[letterNumber];
                 for (int i = 0; i < letterNumber; i++)
                 {
-                    letter.Add(Random.Range(0, letters.Length));
+                    letter[i] = Random.Range(0, letters.Length);
                 }
-                GenerateTextObject();
+                break;
+        }
+    }
+
+    public void SwitchGameType()
+    {
+        switch (gameTypeNumber)
+        {
+            case 0:
+                GenerateTextObject(textArrayObject, textArray, canvas);
+                GenerateTextObject(enemyTextArrayObject, enemyTextArray, enemyCanvas);
+                RandomTextGenerate();
+                break;
+            case 1:
+                GenerateTextObject(textArrayObject, textArray, canvas);
+                GenerateTextObject(enemyTextArrayObject, enemyTextArray, enemyCanvas);
                 RoopTextGenerate();
                 break;
         }
     }
 
-    void GenerateTextObject()
+    void GenerateTextObject(List<GameObject> textArrayObject, List<Text> textArray, Transform canvas)
     {
         for (int i = 0; i < letterNumber; i++)
         {
@@ -84,9 +102,9 @@ public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
     {
         for (int i = 0; i < letterNumber; i++)
         {
-            int r = Random.Range(0, letters.Length);
-            textArray[i].text = letters[r];
-            arrangedLetters.Add(letters[r]);
+            textArray[i].text = letters[letter[i]];
+            enemyTextArray[i].text = letters[letter[i]];
+            arrangedLetters.Add(letters[letter[i]]);
         }
     }
 
@@ -94,11 +112,11 @@ public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
     {
         for (int i = 0; i < loopEachNumber; i++)
         {
-            int r = Random.Range(0, letters.Length);
-            loopText.Add(letters[r]);
+            loopText.Add(letters[letter[i]]);
             for (int j = 0; j < loopNumber; j++)
             {
-                textArray[j * loopEachNumber + i].text = letters[r];
+                textArray[j * loopEachNumber + i].text = letters[letter[i]];
+                enemyTextArray[j * loopEachNumber + i].text = letters[letter[i]];
             }
         }
         for (int i = 0; i < loopNumber; i++)
@@ -144,11 +162,10 @@ public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
         textArray[letterNumber - arrangedLetters.Count].color = color;
     }
 
-    /*void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
         {
-            //if (!PhotonNetwork.IsMasterClient) return;
             stream.SendNext(gameTypeNumber);
             stream.SendNext(letterNumber);
             stream.SendNext(loopEachNumber);
@@ -157,12 +174,11 @@ public class TextGenerator : MonoBehaviourPunCallbacks/*, IPunObservable*/
         }
         else
         {
-            //if (PhotonNetwork.IsMasterClient) return;
             gameTypeNumber = (int)stream.ReceiveNext();
             letterNumber = (int)stream.ReceiveNext();
             loopEachNumber = (int)stream.ReceiveNext();
             loopNumber = (int)stream.ReceiveNext();
-            letter = (List<int>)stream.ReceiveNext();
+            letter = (int[])stream.ReceiveNext();
         }
-    }*/
+    }
 }
