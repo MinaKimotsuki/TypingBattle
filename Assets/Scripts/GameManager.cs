@@ -13,8 +13,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     [SerializeField] Text enemyNameText;
     [SerializeField] GameObject playerNameTextObject;
     [SerializeField] GameObject enemyNameTextObject;
+    [SerializeField] Text judgementText;
+    [SerializeField] GameObject judgementTextObject;
+    [SerializeField] GameObject canvas;
     bool isMasterclientFinished = false;
     bool isAnotherFinished = false;
+    string judgement;
 
     private void Start()
     {
@@ -22,13 +26,12 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         HideCursor();
         HideFinishText(finishText);
         HideFinishText(enemyFinishText);
-        HideNameText();
+        HideJudgementText();
     }
 
     private void Update()
     {
         OnClick();
-        StartCoroutine(FinishJudge());
     }
 
     /*public void CallSetIsMasterclientFinished()
@@ -68,36 +71,44 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     public void SetIsMasterClientFinished()
     {
         isMasterclientFinished = true;
-        if (PhotonNetwork.IsMasterClient)
+        ShowFinishText(finishText);
+        if (isAnotherFinished)
         {
-            ShowFinishText(finishText);
+            judgement = "LOSE";
+            photonView.RPC(nameof(FinishJudge), RpcTarget.AllViaServer);
         }
         else
         {
-            ShowFinishText(enemyFinishText);
+            judgement = "WIN";
         }
     }
 
     public void SetIsAnotherFinished()
     {
         isAnotherFinished = true;
-        if (!PhotonNetwork.IsMasterClient)
+        ShowFinishText(finishText);
+        if (isMasterclientFinished)
         {
-            ShowFinishText(finishText);
+            judgement = "LOSE";
+
+            Debug.Log(isMasterclientFinished);
+            Debug.Log(isAnotherFinished);
+            photonView.RPC(nameof(FinishJudge), RpcTarget.AllViaServer);
         }
         else
         {
-            ShowFinishText(enemyFinishText);
+            judgement = "WIN";
         }
     }
 
+    [PunRPC]
     IEnumerator FinishJudge()
     {
         yield return new WaitForSeconds(1f);
-        Debug.Log("Master:"+isMasterclientFinished);
-        Debug.Log("another:"+isAnotherFinished);
         if (isMasterclientFinished == true && isAnotherFinished  == true)
         {
+            ShowJudgementText(judgement);
+            yield return new WaitForSeconds(1f);
             StartCoroutine("LoadScene");
         }
     }
@@ -135,12 +146,6 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         enemyNameText.text = PhotonNetwork.PlayerListOthers[0].NickName;
     }
 
-    public void HideNameText()
-    {
-        playerNameTextObject.SetActive(false);
-        enemyNameTextObject.SetActive(false);
-    }
-
     void OnClick()
     {
         if (Input.GetMouseButtonDown(0))
@@ -160,29 +165,28 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         Cursor.visible = true;
     }
 
+    void HideJudgementText()
+    {
+        judgementTextObject.SetActive(false);
+    }
+
+    void ShowJudgementText(string judgement)
+    {
+        judgementTextObject.SetActive(true);
+        judgementText.text = judgement;
+    }
+
     void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
         {
-            if (PhotonNetwork.IsMasterClient)
-            {
-                stream.SendNext(isMasterclientFinished);
-            }
-            else
-            {
-                stream.SendNext(isAnotherFinished);
-            }
+            stream.SendNext(isMasterclientFinished);
+            stream.SendNext(isAnotherFinished);
         }
         else
         {
-            if (PhotonNetwork.IsMasterClient)
-            {
-                isAnotherFinished = (bool)stream.ReceiveNext();
-            }
-            else
-            {
-                isMasterclientFinished = (bool)stream.ReceiveNext();
-            }
+            isAnotherFinished = (bool)stream.ReceiveNext();
+            isMasterclientFinished = (bool)stream.ReceiveNext();
         }
     }
 }
