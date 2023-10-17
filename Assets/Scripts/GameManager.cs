@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using Photon.Pun;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviourPunCallbacks/*, IPunObservable*/
+public class GameManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] GameObject finishText;
     [SerializeField] GameObject enemyFinishText;
@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviourPunCallbacks/*, IPunObservable*/
         {
             ShowFinishText(finishText);
         }
-        FinishJudge();
+        StartCoroutine(FinishJudge());
     }
 
     [PunRPC]
@@ -65,56 +65,21 @@ public class GameManager : MonoBehaviourPunCallbacks/*, IPunObservable*/
         {
             ShowFinishText(finishText);
         }
-        FinishJudge();
+        StartCoroutine(FinishJudge());
     }
-
-    /*public void SetIsMasterClientFinished()
-    {
-        isMasterclientFinished = true;
-        ShowFinishText(finishText);
-        if (isAnotherFinished)
-        {
-            judgement = "LOSE";
-            photonView.RPC(nameof(FinishJudge), RpcTarget.AllViaServer);
-        }
-        else
-        {
-            judgement = "WIN";
-        }
-    }
-
-    public void SetIsAnotherFinished()
-    {
-        isAnotherFinished = true;
-        ShowFinishText(finishText);
-        if (isMasterclientFinished)
-        {
-            judgement = "LOSE";
-
-            Debug.Log(isMasterclientFinished);
-            Debug.Log(isAnotherFinished);
-            photonView.RPC(nameof(FinishJudge), RpcTarget.AllViaServer);
-        }
-        else
-        {
-            judgement = "WIN";
-        }
-    }*/
 
     IEnumerator FinishJudge()
     {
-        Debug.Log("c");
         yield return new WaitForSeconds(1f);
         if (isMasterclientFinished == true && isAnotherFinished  == true)
         {
-            Debug.Log("d");
             ShowJudgementText(judgement);
             yield return new WaitForSeconds(1f);
             StartCoroutine("LoadScene");
         }
     }
 
-    private IEnumerator LoadScene()
+    IEnumerator LoadScene()
     {
         yield return new WaitForSeconds(1f);
         if (GameDataManager.Instance.SceneNumber == 5)
@@ -125,7 +90,8 @@ public class GameManager : MonoBehaviourPunCallbacks/*, IPunObservable*/
         }
         else
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            PhotonNetwork.AutomaticallySyncScene = true;
+            PhotonNetwork.LoadLevel("Main");
         }
     }
 
@@ -176,18 +142,4 @@ public class GameManager : MonoBehaviourPunCallbacks/*, IPunObservable*/
         judgementTextObject.SetActive(true);
         judgementText.text = judgement;
     }
-
-    /*void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
-    {
-        if (stream.IsWriting)
-        {
-            stream.SendNext(isMasterclientFinished);
-            stream.SendNext(isAnotherFinished);
-        }
-        else
-        {
-            isAnotherFinished = (bool)stream.ReceiveNext();
-            isMasterclientFinished = (bool)stream.ReceiveNext();
-        }
-    }*/
 }
