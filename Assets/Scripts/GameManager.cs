@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 using Photon.Pun;
 using UnityEngine.UI;
 
-public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
+public class GameManager : MonoBehaviourPunCallbacks/*, IPunObservable*/
 {
     [SerializeField] GameObject finishText;
     [SerializeField] GameObject enemyFinishText;
@@ -34,7 +34,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         OnClick();
     }
 
-    /*public void CallSetIsMasterclientFinished()
+    public void CallSetIsMasterclientFinished()
     {
         photonView.RPC(nameof(SetIsMasterclientFinished), RpcTarget.AllViaServer);
     }
@@ -45,30 +45,30 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
     }
 
     [PunRPC]
-    public void SetIsMasterclientFinished()
+    void SetIsMasterclientFinished()
     {
         Debug.Log("a");
         isMasterclientFinished = true;
         if (PhotonNetwork.IsMasterClient)
         {
-            ShowFinishText();
+            ShowFinishText(finishText);
         }
         FinishJudge();
     }
 
     [PunRPC]
-    public void SetIsAnotherFinished()
+    void SetIsAnotherFinished()
     {
         Debug.Log("b");
-        isMasterclientFinished = true;
+        isAnotherFinished = true;
         if (!PhotonNetwork.IsMasterClient)
         {
-            ShowFinishText();
+            ShowFinishText(finishText);
         }
         FinishJudge();
-    }*/
+    }
 
-    public void SetIsMasterClientFinished()
+    /*public void SetIsMasterClientFinished()
     {
         isMasterclientFinished = true;
         ShowFinishText(finishText);
@@ -99,14 +99,15 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         {
             judgement = "WIN";
         }
-    }
+    }*/
 
-    [PunRPC]
     IEnumerator FinishJudge()
     {
+        Debug.Log("c");
         yield return new WaitForSeconds(1f);
         if (isMasterclientFinished == true && isAnotherFinished  == true)
         {
+            Debug.Log("d");
             ShowJudgementText(judgement);
             yield return new WaitForSeconds(1f);
             StartCoroutine("LoadScene");
@@ -176,7 +177,7 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
         judgementText.text = judgement;
     }
 
-    void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
+    /*void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
         if (stream.IsWriting)
         {
@@ -188,5 +189,5 @@ public class GameManager : MonoBehaviourPunCallbacks, IPunObservable
             isAnotherFinished = (bool)stream.ReceiveNext();
             isMasterclientFinished = (bool)stream.ReceiveNext();
         }
-    }
+    }*/
 }
