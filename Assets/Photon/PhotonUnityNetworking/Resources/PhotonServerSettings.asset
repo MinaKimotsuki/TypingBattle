@@ -43,6 +43,9 @@ MonoBehaviour:
   - SetIsAnotherFinished
   - SetIsMasterclientFinished
   - FinishJudge
+  - ChangeAnotherTextColor
+  - ChangeMasterTextColor
+  - UpdateEnemyTextColor
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

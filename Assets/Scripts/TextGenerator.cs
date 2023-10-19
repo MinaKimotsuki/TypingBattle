@@ -18,8 +18,8 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
     List<GameObject> textArrayObject = new List<GameObject>();
     List<GameObject> enemyTextArrayObject = new List<GameObject>();
     List<string> arrangedLetters = new List<string>();
-    string[] masterArrangedLetters;
-    string[] anotherArrangedLetters;
+    /*string[] masterArrangedLetters;
+    string[] anotherArrangedLetters;*/
     RectTransform rectTransform;
     float textWidth = 20f;
     float textHight = 50f;
@@ -31,8 +31,11 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
     List<string> loopText = new List<string>();
     int gameTypeNumber;
     int[] letter;
-    bool isMasterArrangedLettersNullOrEmpty = true;
-    bool isAnotherArrangedLettersNullOrEmpty = true;
+    /*bool isMasterArrangedLettersNullOrEmpty = true;
+    bool isAnotherArrangedLettersNullOrEmpty = true;*/
+    int[] masterTextColor;
+    int[] anotherTextColor;
+    Color[] colorTextArray = new Color[] { Color.white, Color.red, Color.black };
 
 
     // Start is called before the first frame update
@@ -46,8 +49,8 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
     {
         InputKey();
         /*UpdateEnemyText();*/
-        SetIsAnotherrArrangedLettersNullOrEmpty();
-        SetIsMasterArrangedLettersNullOrEmpty();
+        /*SetIsAnotherrArrangedLettersNullOrEmpty();
+        SetIsMasterArrangedLettersNullOrEmpty();*/
     }
 
     void Prepare()
@@ -57,6 +60,16 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
         {
             case 0:
                 letterNumber = Random.Range(5, 11);
+                masterTextColor = new int[letterNumber];
+                for (int i = 0; i < letterNumber; i++)
+                {
+                    masterTextColor[i] = 0;
+                }
+                anotherTextColor = new int[letterNumber];
+                for (int i = 0; i < letterNumber; i++)
+                {
+                    anotherTextColor[i] = 0;
+                }
                 letter = new int[letterNumber];
                 for (int i = 0; i < letterNumber; i++)
                 {
@@ -67,6 +80,16 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
                 loopEachNumber = Random.Range(2, 5);
                 loopNumber = Random.Range(5, 10);
                 letterNumber = loopEachNumber * loopNumber;
+                masterTextColor = new int[letterNumber];
+                for (int i = 0; i < letterNumber; i++)
+                {
+                    masterTextColor[i] = 0;
+                }
+                anotherTextColor = new int[letterNumber];
+                for (int i = 0; i < letterNumber; i++)
+                {
+                    anotherTextColor[i] = 0;
+                }
                 letter = new int[letterNumber];
                 for (int i = 0; i < letterNumber; i++)
                 {
@@ -169,7 +192,16 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
 
         if (Input.GetKeyDown(arrangedLetters[0]))
         {
-            textArray[letterNumber - arrangedLetters.Count].color = Color.black;
+            TextColorChange(Color.black, letterNumber - arrangedLetters.Count);
+            if (PhotonNetwork.IsMasterClient)
+            {
+                photonView.RPC(nameof(ChangeMasterTextColor), RpcTarget.All, 2, letterNumber - arrangedLetters.Count);
+            }
+            else
+            {
+                photonView.RPC(nameof(ChangeAnotherTextColor), RpcTarget.All, 2, letterNumber - arrangedLetters.Count);
+            }
+            photonView.RPC(nameof(UpdateEnemyTextColor), RpcTarget.Others);
             /*if (PhotonNetwork.IsMasterClient)
             {
                 masterArrangedLetters[letterNumber - arrangedLetters.Count] = "";
@@ -198,9 +230,51 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
         else if (Input.GetMouseButtonDown(2)) { }
         else if (Input.anyKeyDown)
         {
-            textArray[letterNumber - arrangedLetters.Count].color = Color.red;
+            TextColorChange(Color.red, letterNumber - arrangedLetters.Count);
+            if (PhotonNetwork.IsMasterClient)
+            {
+                photonView.RPC(nameof(ChangeMasterTextColor), RpcTarget.All, 1, letterNumber - arrangedLetters.Count);
+            }
+            else
+            {
+                photonView.RPC(nameof(ChangeAnotherTextColor), RpcTarget.All, 1, letterNumber - arrangedLetters.Count);
+            }
+            photonView.RPC(nameof(UpdateEnemyTextColor), RpcTarget.Others);
         }
     }
+
+    [PunRPC]
+    void ChangeMasterTextColor(int colorNumber, int number)
+    {
+        masterTextColor[number] = colorNumber;
+    }
+    [PunRPC]
+    void ChangeAnotherTextColor(int colorNumber, int number)
+    {
+        Debug.Log(number);
+        anotherTextColor[number] = colorNumber;
+    }
+
+
+    [PunRPC]
+    void UpdateEnemyTextColor()
+    {
+        if (PhotonNetwork.IsMasterClient)
+        {
+            for (int i = 0; i < letterNumber; i++)
+            {
+                enemyTextArray[i].color = colorTextArray[anotherTextColor[i]];
+            }
+        }
+        else
+        {
+            for (int i = 0; i < letterNumber; i++)
+            {
+                enemyTextArray[i].color = colorTextArray[masterTextColor[i]];
+            }
+        }
+    }
+
 
     /*void UpdateEnemyText()
     {
@@ -226,12 +300,12 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
     }*/
     
 
-    void TextColorChange(Color color)
+    void TextColorChange(Color color, int number)
     {
-        textArray[letterNumber - arrangedLetters.Count + 1].color = color;
+        textArray[number].color = color;
     }
 
-    void SetIsMasterArrangedLettersNullOrEmpty()
+    /*void SetIsMasterArrangedLettersNullOrEmpty()
     {
         if (masterArrangedLetters == null)
         {
@@ -246,9 +320,9 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
             isMasterArrangedLettersNullOrEmpty = true;
         }
 
-    }
+    }*/
 
-    void SetIsAnotherrArrangedLettersNullOrEmpty()
+    /*void SetIsAnotherrArrangedLettersNullOrEmpty()
     {
         if (anotherArrangedLetters == null)
         {
@@ -262,7 +336,7 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
         {
             isAnotherArrangedLettersNullOrEmpty = false;
         }
-    }
+    }*/
 
     void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
@@ -277,7 +351,7 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
             stream.SendNext(letter);
 
 
-            if (isMasterArrangedLettersNullOrEmpty == false)
+            /*if (isMasterArrangedLettersNullOrEmpty == false)
             {
                 stream.SendNext(masterArrangedLetters);
 
@@ -286,7 +360,7 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
             {
                 stream.SendNext(anotherArrangedLetters);
 
-            }
+            }*/
             //stream.SendNext(anotherArrangedLetters);
         }
         else
@@ -296,14 +370,14 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
             loopEachNumber = (int)stream.ReceiveNext();
             loopNumber = (int)stream.ReceiveNext();
             letter = (int[])stream.ReceiveNext();
-            if (isMasterArrangedLettersNullOrEmpty == false)
+            /*if (isMasterArrangedLettersNullOrEmpty == false)
             {
                 masterArrangedLetters = (string[])stream.ReceiveNext();
             }
             if (isAnotherArrangedLettersNullOrEmpty == false)
             {
                 anotherArrangedLetters = (string[])stream.ReceiveNext();
-            }
+            }*/
         }
     }
 }
