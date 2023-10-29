@@ -79,6 +79,30 @@ public class GameManager : MonoBehaviourPunCallbacks
     IEnumerator FinishJudge()
     {
         yield return new WaitForSeconds(1f);
+        if (isMasterclientFinished == true && isAnotherFinished == false)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                judgement = "WIN";
+            }
+            else
+            {
+                judgement = "LOSE";
+            }
+            GameDataManager.Instance.masterWinNumber++;
+        }
+        if (isMasterclientFinished == false && isAnotherFinished == true)
+        {
+            if (PhotonNetwork.IsMasterClient)
+            {
+                judgement = "LOSE";
+            }
+            else
+            {
+                judgement = "WIN";
+            }
+            GameDataManager.Instance.anotherWinNumber++;
+        }
         if (isMasterclientFinished == true && isAnotherFinished  == true)
         {
             ShowJudgementText(judgement);
@@ -94,6 +118,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             GameDataManager.Instance.SceneNumber = 0;
             ShowCursor();
+            PhotonNetwork.AutomaticallySyncScene = true;
             SceneManager.LoadScene("Result");
         }
         else
