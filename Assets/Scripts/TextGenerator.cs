@@ -60,16 +60,6 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
         {
             case 0:
                 letterNumber = Random.Range(5, 11);
-                masterTextColor = new int[letterNumber];
-                for (int i = 0; i < letterNumber; i++)
-                {
-                    masterTextColor[i] = 0;
-                }
-                anotherTextColor = new int[letterNumber];
-                for (int i = 0; i < letterNumber; i++)
-                {
-                    anotherTextColor[i] = 0;
-                }
                 letter = new int[letterNumber];
                 for (int i = 0; i < letterNumber; i++)
                 {
@@ -77,19 +67,9 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
                 }
                 break;
             case 1:
-                loopEachNumber = Random.Range(2, 5);
-                loopNumber = Random.Range(5, 10);
+                loopEachNumber = Random.Range(2, 4);
+                loopNumber = Random.Range(4, 6);
                 letterNumber = loopEachNumber * loopNumber;
-                masterTextColor = new int[letterNumber];
-                for (int i = 0; i < letterNumber; i++)
-                {
-                    masterTextColor[i] = 0;
-                }
-                anotherTextColor = new int[letterNumber];
-                for (int i = 0; i < letterNumber; i++)
-                {
-                    anotherTextColor[i] = 0;
-                }
                 letter = new int[letterNumber];
                 for (int i = 0; i < letterNumber; i++)
                 {
@@ -112,11 +92,13 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
                 GenerateTextObject(textArrayObject, textArray, player);
                 GenerateTextObject(enemyTextArrayObject, enemyTextArray, enemy);
                 RandomTextGenerate();
+                GenerateMasterAndAnotherTextColor();
                 break;
             case 1:
                 GenerateTextObject(textArrayObject, textArray, player);
                 GenerateTextObject(enemyTextArrayObject, enemyTextArray, enemy);
                 RoopTextGenerate();
+                GenerateMasterAndAnotherTextColor();
                 break;
         }
     }
@@ -150,6 +132,20 @@ public class TextGenerator : MonoBehaviourPunCallbacks, IPunObservable
                 anotherArrangedLetters = new string[letterNumber];
                 anotherArrangedLetters[i] = letters[letter[i]];
             }*/
+        }
+    }
+
+    void GenerateMasterAndAnotherTextColor()
+    {
+        masterTextColor = new int[letterNumber];
+        for (int i = 0; i < letterNumber; i++)
+        {
+            masterTextColor[i] = 0;
+        }
+        anotherTextColor = new int[letterNumber];
+        for (int i = 0; i < letterNumber; i++)
+        {
+            anotherTextColor[i] = 0;
         }
     }
 
