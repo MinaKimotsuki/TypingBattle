@@ -53,6 +53,10 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             ShowFinishText(finishText);
         }
+        else
+        {
+            ShowFinishText(enemyFinishText);
+        }
         StartCoroutine(FinishJudge());
     }
 
@@ -64,6 +68,10 @@ public class GameManager : MonoBehaviourPunCallbacks
         if (!PhotonNetwork.IsMasterClient)
         {
             ShowFinishText(finishText);
+        }
+        else
+        {
+            ShowFinishText(enemyFinishText);
         }
         StartCoroutine(FinishJudge());
     }
