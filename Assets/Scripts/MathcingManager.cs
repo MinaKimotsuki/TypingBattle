@@ -10,19 +10,36 @@ public class MathcingManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] Text playerNickNameText;
     [SerializeField] GameObject writeNickNameText;
-
+    [SerializeField] GameObject matchingButton;
+    [SerializeField] GameObject loadingImage;
+    [SerializeField] RectTransform loadingImageTransform;
+    bool isLoading = false;
     bool isJoinedRoom = false;
+    float time = 0;
 
     // Start is called before the first frame update
     void Start()
     {
         writeNickNameText.SetActive(false);
+        loadingImage.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
         LoadScene();
+        if (!isLoading) return;
+        Loading();
+    }
+
+    void Loading()
+    {
+        time += Time.deltaTime;
+        if (time >= 0.5f)
+        {
+            loadingImageTransform.Rotate(0, 0, -45);
+            time = 0;
+        }
     }
 
     public void OnMatchingButton()
@@ -33,6 +50,9 @@ public class MathcingManager : MonoBehaviourPunCallbacks
         }
         else
         {
+            matchingButton.SetActive(false);
+            loadingImage.SetActive(true);
+            isLoading = true;
             PhotonNetwork.NickName = playerNickNameText.text;
             PhotonNetwork.ConnectUsingSettings();
         }

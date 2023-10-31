@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     [SerializeField] Text judgementText;
     [SerializeField] GameObject judgementTextObject;
     [SerializeField] GameObject canvas;
+    [SerializeField] Text gameNumberText1;
     bool isMasterclientFinished = false;
     bool isAnotherFinished = false;
     string judgement;
@@ -27,11 +28,17 @@ public class GameManager : MonoBehaviourPunCallbacks
         HideFinishText(finishText);
         HideFinishText(enemyFinishText);
         HideJudgementText();
+        ShowGameNumber();
     }
 
     private void Update()
     {
         OnClick();
+    }
+
+    void ShowGameNumber()
+    {
+        gameNumberText1.text = GameDataManager.Instance.SceneNumber.ToString();
     }
 
     public void CallSetIsMasterclientFinished()

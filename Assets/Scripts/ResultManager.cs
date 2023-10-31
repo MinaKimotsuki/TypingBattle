@@ -10,11 +10,16 @@ public class ResultManager : MonoBehaviourPunCallbacks
 {
     [SerializeField] Text resultText;
     [SerializeField] GameObject retryButton;
-    [SerializeField] RectTransform titleButton;
+    [SerializeField] GameObject titleButton;
+    [SerializeField] RectTransform titleButtonTransform;
     [SerializeField] GameObject retryPanel;
     [SerializeField] GameObject wentOutPanel;
+    [SerializeField] GameObject loadingImage;
+    [SerializeField] RectTransform loadingImageTransform;
+    bool isLoading = false;
     bool isPlayerReady = false;
     bool isEnemyReady = false;
+    float time = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -22,12 +27,24 @@ public class ResultManager : MonoBehaviourPunCallbacks
         Judge();
         HideRetryPanel();
         HideWentOutPanel();
+        loadingImage.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!isLoading) return;
+        Loading();
+    }
 
+    void Loading()
+    {
+        time += Time.deltaTime;
+        if (time >= 0.5f)
+        {
+            loadingImageTransform.Rotate(0, 0, -45);
+            time = 0;
+        }
     }
 
     void Judge()
@@ -62,20 +79,24 @@ public class ResultManager : MonoBehaviourPunCallbacks
 
     public void OnTitleButton()
     {
-        photonView.RPC(nameof(ShowWentOutPanel), RpcTarget.Others);
         if (PhotonNetwork.IsConnected)
         {
             PhotonNetwork.LeaveRoom();
             PhotonNetwork.Disconnect();
+            SceneManager.LoadScene("Title");
         }
-        SceneManager.LoadScene("Title");
     }
 
-    [PunRPC]
-    void ShowWentOutPanel()
+    public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         wentOutPanel.SetActive(true);
-        titleButton.position = new Vector3(0, -150, 0);
+        titleButton.SetActive(true);
+        loadingImage.SetActive(false);
+        isLoading = false;
+        Vector2 pos = titleButtonTransform.anchoredPosition;
+        pos.x = 0;
+        pos.y = -150;
+        titleButtonTransform.anchoredPosition = pos;
         retryButton.SetActive(false);
     }
 
@@ -83,7 +104,10 @@ public class ResultManager : MonoBehaviourPunCallbacks
     {
         isPlayerReady = true;
         retryButton.SetActive(false);
-        photonView.RPC(nameof(OnRecieveRetryMessage), RpcTarget.Others);    
+        titleButton.SetActive(false);
+        loadingImage.SetActive(true);
+        isLoading = true;
+        photonView.RPC(nameof(OnRecieveRetryMessage), RpcTarget.Others); 
         if (isPlayerReady && isEnemyReady)
         {
             SceneManager.LoadScene("Main");
