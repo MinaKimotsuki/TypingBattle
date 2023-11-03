@@ -121,7 +121,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     IEnumerator LoadScene()
     {
         yield return new WaitForSeconds(1f);
-        if (GameDataManager.Instance.SceneNumber == 1)
+        if (GameDataManager.Instance.SceneNumber == 5)
         {
             GameDataManager.Instance.SceneNumber = 0;
             ShowCursor();

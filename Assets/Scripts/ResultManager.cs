@@ -83,8 +83,12 @@ public class ResultManager : MonoBehaviourPunCallbacks
         {
             PhotonNetwork.LeaveRoom();
             PhotonNetwork.Disconnect();
-            SceneManager.LoadScene("Title");
         }
+    }
+
+    public override void OnDisconnected(DisconnectCause cause)
+    {
+        SceneManager.LoadScene("Title");
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
